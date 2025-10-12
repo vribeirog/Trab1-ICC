@@ -32,5 +32,8 @@ void free_all(real_t ***A, real_t **b, real_t **x, real_t ***ASP, real_t **bsp, 
 real_t** aloca_matriz(int n, int zero_init);
 void free_matriz(real_t **mat);
 
+// Método numérico
+void gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, int* it);
+
 #endif // __SISLIN_H__
 

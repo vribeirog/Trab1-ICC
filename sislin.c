@@ -361,3 +361,74 @@ void free_all(real_t ***A, real_t **b, real_t **x, real_t ***ASP, real_t **bsp,
         *M = NULL;
     }
 }
+
+// calcula produtor escalar (dot product) entre vetores
+real_t dot(real_t *a, real_t *b, int n) {
+    real_t s = 0.0;
+    for (int i = 0; i < n; i++) {
+        s += a[i] * b[i];
+    }
+    return s;
+}
+
+// calcula norma de um vetor a
+real_t norm(real_t *a, int n) {
+    return sqrt(dot(a, a, n));
+}
+
+// calcula produto entre uma matriz e um vetor de dimensoes compativeis
+// talvez add erro caso dimensoes nao sejam compativeis
+void matvec(real_t **A, real_t *x, real_t *y, int n) {
+    for (int i = 0; i < n; i++) {
+        y[i] = 0.0;
+        for (int j = 0; j < n; j++) {
+            y[i] += A[i][j] * x[j];
+        }
+    }
+}
+
+// método numérico de gradientes conjugados
+void gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, int* it) {
+    real_t *residuo = malloc(n * sizeof(real_t));
+    real_t *search_direction = malloc(n * sizeof(real_t));
+    real_t *A_search_direction = malloc(n * sizeof(real_t));
+    int iter = 0;
+
+    // calculo do residuo = b - A*x
+    matvec(A, x, residuo, n);
+    for (int i = 0; i < n; i++) {
+        residuo[i] = b[i] - residuo[i];
+        search_direction[i] = residuo[i];
+    }
+
+    real_t old_resid_norm = norm(residuo, n);
+
+    // itera enquanto a norma é menor que a tolerancia (epsilon) ou nao ultrapassa maxit
+    while ((old_resid_norm > tol) && (iter < maxit)) {
+        matvec(A, search_direction, A_search_direction, n);
+        real_t denom = dot(search_direction, A_search_direction, n);
+        real_t step_size = (old_resid_norm * old_resid_norm) / denom;
+
+        // x = x + step_size * search_direction
+        for (int i = 0; i < n; i++) {
+            x[i] += step_size * search_direction[i];
+            residuo[i] -= step_size * A_search_direction[i];
+        }
+
+        real_t new_resid_norm = norm(residuo, n);
+        real_t beta = (new_resid_norm * new_resid_norm) / (old_resid_norm * old_resid_norm);
+
+        for (int i = 0; i < n; i++) {
+            search_direction[i] = residuo[i] + beta * search_direction[i];
+        }
+
+        old_resid_norm = new_resid_norm;
+        iter++;
+    }
+
+    *it = iter;
+
+    free(residuo);
+    free(search_direction);
+    free(A_search_direction);
+}

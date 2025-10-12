@@ -10,7 +10,7 @@
 int main() {
     srandom(20252);
 
-    int n, k, maxit;
+    int n, k, maxit, it;
     real_t omega, epsilon;
     // ASP = A * AT
     // bsp = AT * b
@@ -74,6 +74,12 @@ int main() {
     printf("\n");
 
     geraPreCond(D, L, U, omega, n, k, M, &tempo_pc); 
+    
+    gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &it);
+
+    printf("solução do SL sem pré-condicionadores:\n");
+    imprime_vetor(x, n);
+    printf("iterações: %d\n", it);
     
 
     // Liberar toda a memoria alocada
