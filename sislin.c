@@ -30,10 +30,122 @@ static inline real_t generateRandomB( unsigned int k )
   return (real_t)(k<<2) * (real_t)random() * invRandMax;
 }
 
+MatrizKDiag* alocaMatrizKDiag(unsigned int n, unsigned int k) {
+    MatrizKDiag *A = malloc(sizeof(MatrizKDiag));
+    A->n = n;
+    A->k = k;
+
+    A->offsets = malloc(k * sizeof(int));
+    A->A = malloc(n * sizeof(real_t*));
+
+    int half_band = k / 2;
+    for (unsigned int i = 0; i < k; i++) {
+        A->offsets[i] = (int)i - half_band;  // e.g., for k=5 → [-2, -1, 0, 1, 2]
+    }
+
+    for (unsigned int i = 0; i < n; i++) {
+        A->A[i] = calloc(n, sizeof(real_t));
+    }
+
+    return A;
+}
+
+real_t* alocaB(unsigned int n, unsigned int k) {
+
+  real_t *b = malloc(n * sizeof(real_t));
+    
+  for (unsigned int i = 0; i < n; i++)
+        b[i] = generateRandomB(k);
+
+    return b;
+}
+
+void fillKDiagMatrix(MatrizKDiag *M) {
+    unsigned int n = M->n;
+
+    // Allocate A and fill with zeros
+    M->A = malloc(n * sizeof(real_t *));
+    for (unsigned int i = 0; i < n; i++) {
+        M->A[i] = calloc(n, sizeof(real_t));
+    }
+
+    // Fill each k-diagonal according to offsets
+    for (unsigned int d = 0; d < M->k; d++) {
+        int offset = M->offsets[d];
+
+        // Positive offsets: upper diagonals
+        // Negative offsets: lower diagonals
+        for (unsigned int i = 0; i < n; i++) {
+            int j = (int)i + offset;
+            if (j < 0 || j >= (int)n)
+                continue;
+            M->A[i][j] = generateRandomA(i, j, M->k);
+        }
+    }
+
+    // Allocate b and fill with zeros (or random if desired)
+    M->b = calloc(n, sizeof(real_t));
+}
+
+
+MatrizKDiag* geraMatrizTransposta(const MatrizKDiag *A) {
+    MatrizKDiag *AT = alocaMatrizKDiag(A->n, A->k);
+    int k = A->k;
+
+    // da pra melhorar
+    for (unsigned int i = 0; i < A->n; i++) {
+        for (unsigned int j = 0; j < A->n; j++) {
+            AT->A[i][j] = A->A[j][i];
+        }
+    }
+
+    return AT;
+}
+
+MatrizKDiag *multiplicaMatriz(const MatrizKDiag *A, const MatrizKDiag *B) {
+    if (A->n != B->n) {
+        fprintf(stderr, "Erro: matrizes nao possuem dimensoes compativeis.\n");
+        return NULL;
+    }
+
+    unsigned int n = A->n;
+
+    // aloca matriz resultado C
+    MatrizKDiag *C = malloc(sizeof(MatrizKDiag));
+    if (!C) return NULL;
+
+    C->n = n;
+    C->k = A->k + B->k - 1;
+    C->offsets = NULL;
+
+    // aloca matriz de coefs em C
+    C->A = malloc(n * sizeof(real_t *));
+    for (unsigned int i = 0; i < n; i++) {
+        C->A[i] = calloc(n, sizeof(real_t)); // initialize with 0
+    }
+
+    // preencher depois
+    C->b = calloc(n, sizeof(real_t));
+
+    // multiplicação de matriz nxn
+    for (unsigned int i = 0; i < n; i++) {
+        for (unsigned int j = 0; j < n; j++) {
+            real_t sum = 0.0;
+            for (unsigned int k = 0; k < n; k++) {
+                sum += A->A[i][k] * B->A[k][j];
+            }
+            C->A[i][j] = sum;
+        }
+    }
+
+    return C;
+}
+
 
 /* Cria matriz 'A' k-diagonal e Termos independentes B */
-void criaKDiagonal(int n, int k, real_t **A, real_t **B)
-{
+void criaKDiagonal(int n, int k, real_t **A, real_t **B) {
+
+    
   
 }
 
@@ -82,5 +194,3 @@ real_t calcResiduoSL (real_t *A, real_t *b, real_t *X,
 
   *tempo = timestamp() - *tempo;
 }
-
-

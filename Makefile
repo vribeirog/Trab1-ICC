@@ -5,7 +5,8 @@
 
       PROG = cgSolver
       MODULES = utils \
-	        pcgc \
+	        cgSolver \
+			sislin \
                 $(PROG)
       OBJS = $(addsuffix .o,$(MODULES))
       SRCS = $(addsuffix .c,$(MODULES)) $(addsuffix .h,$(MODULES))
