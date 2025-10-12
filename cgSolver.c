@@ -65,6 +65,7 @@ int main() {
     if (omega >= 0.0)
         geraDLU(A, n, k, D, L, U, &tempo_dlu); 
 
+    printf("matriz D, L, U:\n");
     imprime_matriz(D, n);
     printf("\n");
     imprime_matriz(L, n);
