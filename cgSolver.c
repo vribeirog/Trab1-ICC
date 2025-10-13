@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "utils.h"
+#include "matvet.h"
 #include "sislin.h"
 
 int main() {
@@ -63,7 +64,7 @@ int main() {
     printf("\n");
 
     if (omega >= 0.0)
-        geraDLU(A, n, k, D, L, U, &tempo_dlu); 
+        geraDLU(ASP, n, k, D, L, U, &tempo_dlu); 
 
     printf("matriz D, L, U:\n");
     imprime_matriz(D, n);

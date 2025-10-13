@@ -6,6 +6,7 @@
       PROG = cgSolver
       MODULES = utils \
 	        cgSolver \
+			matvet \
 			sislin \
                 $(PROG)
       OBJS = $(addsuffix .o,$(MODULES))
