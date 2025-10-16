@@ -7,16 +7,15 @@
 #include "utils.h"
 #include "matvet.h"
 #include "sislin.h"
+#include "gradconj.h"
 
 int main() {
     srandom(20252);
 
     int n, k, maxit, it;
-    real_t omega, epsilon;
-    // ASP = A * AT
-    // bsp = AT * b
+    real_t omega, epsilon, norma, residuo;;
     real_t **A, *b, *x, **ASP, *bsp, **D, **L, **U, **M;
-    rtime_t tempo_simetrica, tempo_dlu, tempo_pc = 0.0;
+    rtime_t tempo_simetrica, tempo_dlu, tempo_pc_parcial, tempo_iter, tempo_residuo = 0.0;
 
     scanf("%d", &n); // Dimensao da matriz (n x n)
     scanf("%d", &k); // Numero de diagonais da matriz A
@@ -53,34 +52,28 @@ int main() {
     printf("\n");
 
     // Gerar matriz simétrica positiva usando a função genSimetricaPositiva
+    // ASP = A * AT
+    // bsp = AT * b
     genSimetricaPositiva(A, b, n, k, ASP, bsp, &tempo_simetrica);
     
-    printf("matriz simetrica:\n");
-    imprime_matriz(ASP, n);
-    printf("\n");
+    //printf("matriz simetrica:\n");
+    //imprime_matriz(ASP, n);
+    //printf("\n");
     
-    printf("vetor AT * b:\n");
-    imprime_vetor(bsp, n);
-    printf("\n");
+    //printf("vetor AT * b:\n");
+    //imprime_vetor(bsp, n);
+    //printf("\n");
 
     if (omega >= 0.0)
         geraDLU(ASP, n, k, D, L, U, &tempo_dlu); 
 
-    printf("matriz D, L, U:\n");
-    imprime_matriz(D, n);
-    printf("\n");
-    imprime_matriz(L, n);
-    printf("\n");
-    imprime_matriz(U, n);
-    printf("\n");
-
-    geraPreCond(D, L, U, omega, n, k, M, &tempo_pc); 
+    geraPreCond(D, L, U, omega, n, k, M, &tempo_pc_parcial); 
     
-    gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &it);
+    norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &it);
 
-    printf("solução do SL sem pré-condicionadores:\n");
-    imprime_vetor(x, n);
-    printf("iterações: %d\n", it);
+    residuo = calcResiduoSL(ASP, bsp, x, n, k, &tempo_residuo);
+    
+    imprimeResultados(n, x, norma, residuo, tempo_simetrica + tempo_dlu + tempo_pc_parcial, tempo_iter, tempo_residuo);
     
 
     // Liberar toda a memoria alocada

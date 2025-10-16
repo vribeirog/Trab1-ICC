@@ -19,8 +19,5 @@ void geraDLU (real_t **A, int n, int k, real_t **D, real_t **L, real_t **U, rtim
 void geraPreCond(real_t **D, real_t **L, real_t **U, real_t w, int n, int k, real_t **M, rtime_t *tempo);
 real_t calcResiduoSL (real_t **A, real_t *b, real_t *X, int n, int k, rtime_t *tempo);
 
-// Método numérico
-void gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, int* it);
-
 #endif // __SISLIN_H__
 

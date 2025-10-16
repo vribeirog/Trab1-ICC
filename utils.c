@@ -37,4 +37,3 @@ string_t markerName(string_t baseName, int n)
   return mark;
 
 }
-

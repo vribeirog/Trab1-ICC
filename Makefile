@@ -8,6 +8,7 @@
 	        cgSolver \
 			matvet \
 			sislin \
+			gradconj \
                 $(PROG)
       OBJS = $(addsuffix .o,$(MODULES))
       SRCS = $(addsuffix .c,$(MODULES)) $(addsuffix .h,$(MODULES))
