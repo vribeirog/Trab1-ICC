@@ -166,11 +166,37 @@ void geraPreCond(real_t **D, real_t **L, real_t **U, real_t omega, int n, int k,
     *tempo = timestamp() - *tempo;
 }
 
-
-real_t calcResiduoSL (real_t **A, real_t *b, real_t *X,
-		      int n, int k, rtime_t *tempo)
+// Calcula a norma euclidiana do resíduo (||r||L2), onde r= b - Ax
+real_t calcResiduoSL (real_t **A, real_t *b, real_t *X, int n, int k, rtime_t *tempo)
 {
-  *tempo = timestamp();
+    *tempo = timestamp();
 
-  *tempo = timestamp() - *tempo;
+    real_t residuo_norm = 0.0;
+
+    real_t *Ax = malloc(n * sizeof(real_t));
+    if (!Ax) {
+        fprintf(stderr, "Erro ao alocar vetor Ax na calcResiduoSL.\n");
+        exit(1);
+    }
+
+    // Passo 1: Calcular Ax (produto matriz-vetor completo) faça sem funcao auxiliar
+    for(int i = 0; i < n; i++) {
+        Ax[i] = 0.0;
+        for(int j = 0; j < n; j++) {
+            Ax[i] += A[i][j] * X[j];  
+        }
+    }
+
+    // Passo 2: Calcular r = b - Ax e ||r||₂
+    for (int i = 0; i < n; i++) {
+        real_t r_i = b[i] - Ax[i];
+        residuo_norm += r_i * r_i;
+    }
+    residuo_norm = sqrt(residuo_norm);
+
+    free(Ax);
+
+    *tempo = timestamp() - *tempo;
+
+    return residuo_norm;
 }
