@@ -1,3 +1,6 @@
+// Isadora Botassari - GRR20206872
+// Victor Ribeiro Garcia - GRR20203954
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,9 +16,9 @@ int main() {
     srandom(20252);
 
     int n, k, maxit, it;
-    real_t omega, epsilon, norma, residuo;;
+    real_t omega, epsilon, norma = 0.0, residuo = 0.0;
     real_t **A, *b, *x, **ASP, *bsp, **D, **L, **U, **M;
-    rtime_t tempo_simetrica, tempo_dlu, tempo_pc_parcial, tempo_iter, tempo_residuo = 0.0;
+    rtime_t tempo_simetrica = 0.0, tempo_dlu = 0.0, tempo_pc_parcial = 0.0, tempo_iter = 0.0, tempo_residuo = 0.0;
 
     scanf("%d", &n); // Dimensao da matriz (n x n)
     scanf("%d", &k); // Numero de diagonais da matriz A
@@ -28,8 +31,6 @@ int main() {
     scanf("%d", &maxit); // Numero maximo de iteracoes a serem executadas
     scanf("%lf", &epsilon); // Erro aproximado absoluto maximo tolerado
 
-    printf("Parâmetros: omega=%.3f, maxit=%d, epsilon=%e\n", omega, maxit, epsilon);
-
     // Alocar todos os vetores necessários
     if (aloca_vetores(&b, &bsp, &x, n) != 0) {
         return 1;
@@ -41,38 +42,31 @@ int main() {
         return 1;
     }
 
+    // Gerar matriz A k-diagonal e vetor de termos independetes b
     criaKDiagonal(n, k, A, b);
-    
-    printf("matriz orig:\n");
-    imprime_matriz(A, n);
-    printf("\n");
-    
-    printf("vetor b:\n");
-    imprime_vetor(b, n);
-    printf("\n");
 
     // Gerar matriz simétrica positiva usando a função genSimetricaPositiva
     // ASP = A * AT
     // bsp = AT * b
     genSimetricaPositiva(A, b, n, k, ASP, bsp, &tempo_simetrica);
-    
-    //printf("matriz simetrica:\n");
-    //imprime_matriz(ASP, n);
-    //printf("\n");
 
-    //printf("vetor AT * b:\n");
-    //imprime_vetor(bsp, n);
-    //printf("\n");
-
+    // Gerar matrizes D, L e U para o pré-condicionador de Jacobi, se necessário
     if (omega >= 0.0)
         geraDLU(ASP, n, k, D, L, U, &tempo_dlu); 
 
+    // Gerar matriz M⁻¹ de acordo com o pré-condicionador
     geraPreCond(D, L, U, omega, n, k, M, &tempo_pc_parcial); 
     
+    // Resolver o sistema linear usando gradientes conjugados (com ou sem pré-condicionador)
     if (omega == 0.0)
         norma = gradientesConjugadosPrecond(M, ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
-    if (omega == 0.1)
+    else if (omega == -1.0)
         norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
+    else {
+        fprintf(stderr, "Erro: valor de omega inválido. Use -1.0 (sem pré-condicionador) ou 0.0 (Jacobi).\n");
+        free_all(&A, &b, &x, &ASP, &bsp, &D, &L, &U, &M);
+        return 1;
+    }
 
     residuo = calcResiduoSL(ASP, bsp, x, n, k, &tempo_residuo);
     

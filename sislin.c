@@ -1,3 +1,6 @@
+// Isadora Botassari - GRR20206872
+// Victor Ribeiro Garcia - GRR20203954
+
 #include <stdio.h>
 #include <stdlib.h>    
 #include <string.h>
@@ -77,12 +80,9 @@ void genSimetricaPositiva(real_t **A, real_t *b, int n, int k,
             AT[j][i] = A[i][j];
         }
     }
-    
-    printf("matriz transposta:\n");
-    imprime_matriz(AT, n);
-    printf("\n");
 
     // A matriz ASP já foi alocada pela função aloca_matrizes
+    
     // Calcular ASP = A * AT (matriz simétrica positiva definida)
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -145,6 +145,7 @@ void geraPreCond(real_t **D, real_t **L, real_t **U, real_t omega, int n, int k,
     *tempo = timestamp();
 
     // Matriz M já foi alocada e inicializada com zeros pela função aloca_matrizes
+
     // Sem pré-condicionador: M = I (matriz identidade)
     if (omega == -1.0) {
         for (int i = 0; i < n; i++) {
@@ -163,9 +164,6 @@ void geraPreCond(real_t **D, real_t **L, real_t **U, real_t omega, int n, int k,
         }
     }
 
-    // Para implementar casos para omega = 1.0 (Gauss-Seidel) e omega > 1.0 (SSOR)
-    // requerem o cálculo de M = (D + wL)D^(-1)(D + wU)
-
     *tempo = timestamp() - *tempo;
 }
 
@@ -182,7 +180,7 @@ real_t calcResiduoSL (real_t **A, real_t *b, real_t *X, int n, int k, rtime_t *t
         exit(1);
     }
 
-    // Passo 1: Calcular Ax (produto matriz-vetor completo) faça sem funcao auxiliar
+    // Passo 1: Calcular Ax
     for(int i = 0; i < n; i++) {
         Ax[i] = 0.0;
         for(int j = 0; j < n; j++) {

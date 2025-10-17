@@ -1,3 +1,6 @@
+// Isadora Botassari - GRR20206872
+// Victor Ribeiro Garcia - GRR20203954
+
 #include <stdio.h>
 #include <stdlib.h>    
 #include <string.h>
@@ -22,21 +25,21 @@ real_t norma(real_t *a, int n) {
     return sqrt(dot(a, a, n));
 }
 
+// Calcula a norma máxima entre dois vetores X e X_old
 real_t norma_maxima(real_t *X, real_t *X_old, int n) {
     real_t max = 0.0;
 
     for (int i = 0; i < n; i++) {
-        real_t current_norm = fabs(X_old[i] - X[i]);
+        real_t norm = fabs(X_old[i] - X[i]);
 
-        if (current_norm > max)
-            max = current_norm;
+        if (norm > max)
+            max = norm;
     }
 
     return max;
 }
 
-// Calcula produto entre uma matriz e um vetor de dimensoes compativeis
-// talvez add erro caso dimensoes nao sejam compativeis
+// Calcula produto entre uma matriz e um vetor de dimensoes n
 void prodMatVet(real_t **A, real_t *x, real_t *y, int n) {
     for (int i = 0; i < n; i++) {
         y[i] = 0.0;
@@ -46,7 +49,7 @@ void prodMatVet(real_t **A, real_t *x, real_t *y, int n) {
     }
 }
 
-// Método numérico de gradientes conjugados
+// Método numérico de gradientes conjugados sem pré condicionador
 real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, rtime_t* tempo_iter) {
 
     real_t *residuo = malloc(n * sizeof(real_t));
@@ -71,7 +74,7 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
     }
 
     real_t *x_old = malloc(n * sizeof(real_t));
-    if (!A_search_direction) {
+    if (!x_old) {
         fprintf(stderr, "Erro ao alocar vetor x_old na gradientesConjugados.\n");
         free(residuo);
         free(search_direction);
@@ -92,7 +95,7 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
     real_t norma_max = 0.0;
 
     rtime_t tempo = timestamp();
-    // itera enquanto a norma é menor que a tolerancia (epsilon) ou nao ultrapassa maxit
+    // itera enquanto a norma é menor que a tolerancia (epsilon) ou nao ultrapassa o numero iteracoes maxit
     while ((old_resid_norm > tol) && (iter < maxit)) {
         prodMatVet(A, search_direction, A_search_direction, n);
         real_t denom = dot(search_direction, A_search_direction, n);
@@ -121,7 +124,6 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
     tempo = timestamp() - tempo;
 
     *tempo_iter = tempo / iter;
-    //printf("iter: %d \n", iter);
 
     free(residuo);
     free(search_direction);
@@ -229,9 +231,8 @@ real_t gradientesConjugadosPrecond(real_t** M, real_t **A, real_t *b, real_t *x,
     }
 
     tempo = timestamp() - tempo;
+    
     *tempo_iter = tempo / iter;
-
-    //printf("iter: %d \n", iter);
 
     free(residuo);
     free(search_direction);

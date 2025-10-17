@@ -1,3 +1,6 @@
+// Isadora Botassari - GRR20206872
+// Victor Ribeiro Garcia - GRR20203954
+
 #include <stdio.h>
 #include <stdlib.h>    
 #include <string.h>
@@ -6,7 +9,7 @@
 #include "utils.h"
 #include "matvet.h"
 
-// Imprime matriz
+// Imprime matriz n x n
 void imprime_matriz(real_t **mat, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -16,17 +19,17 @@ void imprime_matriz(real_t **mat, int n) {
     }
 }
 
-// Imprime vetor
-void imprime_vetor(real_t *vec, int n) {
+// Imprime vetor de tamanho n
+void imprime_vetor(real_t *vet, int n) {
     for (int i = 0; i < n; i++) {
-        printf("%6.3f ", vec[i]);
+        printf("%6.3f ", vet[i]);
     }
     printf("\n");
 }
 
 // Aloca uma matriz bidimensional de forma contígua na memória
 // Permite acesso mat[i][j] com apenas uma alocação
-// Se zero_init == 1 inicializa todos os elementos com zero
+// Se zero_init == 1 então inicializa todos os elementos com zero
 real_t** aloca_matriz(int n, int zero_init) {
     real_t **mat;
     
@@ -57,7 +60,7 @@ void free_matriz(real_t **mat) {
     }
 }
 
-// Aloca todos os vetores necessários para o programa
+// Aloca todos os vetores necessários para o experimento
 int aloca_vetores(real_t **b, real_t **bsp, real_t **x, int n) {
     // Alocar vetor b
     *b = malloc(n * sizeof(real_t));
@@ -86,7 +89,7 @@ int aloca_vetores(real_t **b, real_t **bsp, real_t **x, int n) {
     return 0; // Sucesso
 }
 
-// Aloca todas as matrizes necessárias para o programa
+// Aloca todas as matrizes necessárias para o experimento
 int aloca_matrizes(real_t ***A, real_t ***ASP, real_t ***D, real_t ***L, real_t ***U, real_t ***M, int n) {
     // Alocar matriz A (k-diagonal original)
     *A = aloca_matriz(n, 0);

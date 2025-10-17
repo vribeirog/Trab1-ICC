@@ -1,3 +1,6 @@
+// Isadora Botassari - GRR20206872
+// Victor Ribeiro Garcia - GRR20203954
+
 #ifndef __MATVET_H__
 #define __MATVET_H__
 
@@ -8,7 +11,7 @@
 
 #include "utils.h"
 
-// Impressão
+// Impressão de matrizes e vetores para testes
 void imprime_matriz(real_t **mat, int n);
 void imprime_vetor(real_t *vet, int n);
 
