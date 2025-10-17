@@ -59,7 +59,7 @@ int main() {
     //printf("matriz simetrica:\n");
     //imprime_matriz(ASP, n);
     //printf("\n");
-    
+
     //printf("vetor AT * b:\n");
     //imprime_vetor(bsp, n);
     //printf("\n");
@@ -69,7 +69,10 @@ int main() {
 
     geraPreCond(D, L, U, omega, n, k, M, &tempo_pc_parcial); 
     
-    norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
+    if (omega == 0.0)
+        norma = gradientesConjugadosPrecond(M, ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
+    if (omega == 0.1)
+        norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
 
     residuo = calcResiduoSL(ASP, bsp, x, n, k, &tempo_residuo);
     

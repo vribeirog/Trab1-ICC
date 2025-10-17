@@ -121,10 +121,123 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
     tempo = timestamp() - tempo;
 
     *tempo_iter = tempo / iter;
+    //printf("iter: %d \n", iter);
 
     free(residuo);
     free(search_direction);
     free(A_search_direction);
+    free(x_old);
+
+    return norma_max;
+}
+
+// Método numérico de gradientes conjugados com pré condicionador
+real_t gradientesConjugadosPrecond(real_t** M, real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, rtime_t* tempo_iter) {
+
+    real_t *residuo = malloc(n * sizeof(real_t));
+    if (!residuo) {
+        fprintf(stderr, "Erro ao alocar vetor residuo na gradientesConjugados.\n");
+        exit(1);
+    }
+
+    real_t *search_direction = malloc(n * sizeof(real_t));
+    if (!search_direction) {
+        fprintf(stderr, "Erro ao alocar vetor search_direction na gradientesConjugados.\n");
+        free(residuo);
+        exit(1);
+    }
+
+    real_t *A_search_direction = malloc(n * sizeof(real_t));
+    if (!A_search_direction) {
+        fprintf(stderr, "Erro ao alocar vetor A_search_direction na gradientesConjugados.\n");
+        free(residuo);
+        free(search_direction);
+        exit(1);
+    }
+
+    real_t *x_old = malloc(n * sizeof(real_t));
+    if (!x_old) {
+        fprintf(stderr, "Erro ao alocar vetor x_old na gradientesConjugados.\n");
+        free(residuo);
+        free(search_direction);
+        free(A_search_direction);
+        exit(1);
+    }
+
+    // novo vetor para o resíduo pré-condicionado
+    real_t *z = malloc(n * sizeof(real_t));
+    if (!z) {
+        fprintf(stderr, "Erro ao alocar vetor z (pré-condicionado).\n");
+        free(residuo);
+        free(search_direction);
+        free(A_search_direction);
+        free(x_old);
+        exit(1);
+    }
+
+    int iter = 0;
+
+    // calculo do residuo = b - A*x
+    prodMatVet(A, x, residuo, n);
+    for (int i = 0; i < n; i++) {
+        residuo[i] = b[i] - residuo[i];
+        // aplica o pré-condicionador de Jacobi: z = M^{-1} * residuo
+        z[i] = M[i][i] * residuo[i];
+        search_direction[i] = z[i];
+    }
+
+    real_t rz = dot(residuo, z, n); // rᵗz
+    real_t old_resid_norm = sqrt(rz);
+    real_t norma_max = 0.0;
+
+    rtime_t tempo = timestamp();
+
+    while ((old_resid_norm > tol) && (iter < maxit)) {
+        prodMatVet(A, search_direction, A_search_direction, n);
+        real_t denom = dot(search_direction, A_search_direction, n);
+        real_t step_size = rz / denom;
+
+        for (int i = 0; i < n; i++) x_old[i] = x[i];
+
+        // x = x + step_size * search_direction
+        for (int i = 0; i < n; i++) {
+            x[i] += step_size * search_direction[i];
+            residuo[i] -= step_size * A_search_direction[i];
+        }
+
+        // aplica novamente o pré-condicionador
+        for (int i = 0; i < n; i++)
+            z[i] = M[i][i] * residuo[i];
+
+        real_t rz_new = dot(residuo, z, n);
+        real_t new_resid_norm = sqrt(rz_new);
+
+        if (new_resid_norm < tol)
+            break;
+
+        real_t beta = rz_new / rz;
+
+        for (int i = 0; i < n; i++) {
+            search_direction[i] = z[i] + beta * search_direction[i];
+        }
+
+        rz = rz_new;
+        old_resid_norm = new_resid_norm;
+        norma_max = norma_maxima(x, x_old, n);
+
+        iter++;
+    }
+
+    tempo = timestamp() - tempo;
+    *tempo_iter = tempo / iter;
+
+    //printf("iter: %d \n", iter);
+
+    free(residuo);
+    free(search_direction);
+    free(A_search_direction);
+    free(x_old);
+    free(z);
 
     return norma_max;
 }

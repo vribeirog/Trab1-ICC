@@ -154,8 +154,11 @@ void geraPreCond(real_t **D, real_t **L, real_t **U, real_t omega, int n, int k,
     // Pré-condicionador de Jacobi: M = D
     else if (omega == 0.0) {
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                M[i][j] = D[i][j];
+             if (D[i][i] != 0)
+                M[i][i] = 1 / D[i][i];
+            else {
+                fprintf(stderr, "Erro ao gerar Jacobi: diagonal principal da matriz possui 0.\n");
+                exit(1);
             }
         }
     }
