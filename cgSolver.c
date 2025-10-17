@@ -69,7 +69,7 @@ int main() {
 
     geraPreCond(D, L, U, omega, n, k, M, &tempo_pc_parcial); 
     
-    norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &it);
+    norma = gradientesConjugados(ASP, bsp, x, n, epsilon, maxit, &tempo_iter);
 
     residuo = calcResiduoSL(ASP, bsp, x, n, k, &tempo_residuo);
     

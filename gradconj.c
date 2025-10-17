@@ -22,6 +22,19 @@ real_t norma(real_t *a, int n) {
     return sqrt(dot(a, a, n));
 }
 
+real_t norma_maxima(real_t *X, real_t *X_old, int n) {
+    real_t max = 0.0;
+
+    for (int i = 0; i < n; i++) {
+        real_t current_norm = fabs(X_old[i] - X[i]);
+
+        if (current_norm > max)
+            max = current_norm;
+    }
+
+    return max;
+}
+
 // Calcula produto entre uma matriz e um vetor de dimensoes compativeis
 // talvez add erro caso dimensoes nao sejam compativeis
 void prodMatVet(real_t **A, real_t *x, real_t *y, int n) {
@@ -34,7 +47,8 @@ void prodMatVet(real_t **A, real_t *x, real_t *y, int n) {
 }
 
 // Método numérico de gradientes conjugados
-real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, int* it) {
+real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol, int maxit, rtime_t* tempo_iter) {
+
     real_t *residuo = malloc(n * sizeof(real_t));
     if (!residuo) {
         fprintf(stderr, "Erro ao alocar vetor residuo na gradientesConjugados.\n");
@@ -56,6 +70,15 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
         exit(1);
     }
 
+    real_t *x_old = malloc(n * sizeof(real_t));
+    if (!A_search_direction) {
+        fprintf(stderr, "Erro ao alocar vetor x_old na gradientesConjugados.\n");
+        free(residuo);
+        free(search_direction);
+        free(A_search_direction);
+        exit(1);
+    }
+
     int iter = 0;
 
     // calculo do residuo = b - A*x
@@ -66,18 +89,24 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
     }
 
     real_t old_resid_norm = norma(residuo, n);
+    real_t norma_max = 0.0;
 
+    rtime_t tempo = timestamp();
     // itera enquanto a norma é menor que a tolerancia (epsilon) ou nao ultrapassa maxit
     while ((old_resid_norm > tol) && (iter < maxit)) {
         prodMatVet(A, search_direction, A_search_direction, n);
         real_t denom = dot(search_direction, A_search_direction, n);
         real_t step_size = (old_resid_norm * old_resid_norm) / denom;
 
+        for (int i = 0; i < n; i++) x_old[i] = x[i];
+
         // x = x + step_size * search_direction
         for (int i = 0; i < n; i++) {
             x[i] += step_size * search_direction[i];
             residuo[i] -= step_size * A_search_direction[i];
         }
+
+        norma_max = norma_maxima(x, x_old, n);
 
         real_t new_resid_norm = norma(residuo, n);
         real_t beta = (new_resid_norm * new_resid_norm) / (old_resid_norm * old_resid_norm);
@@ -89,12 +118,15 @@ real_t gradientesConjugados(real_t **A, real_t *b, real_t *x, int n, real_t tol,
         old_resid_norm = new_resid_norm;
         iter++;
     }
+    tempo = timestamp() - tempo;
 
-    *it = iter;
+    *tempo_iter = tempo / iter;
 
     free(residuo);
     free(search_direction);
     free(A_search_direction);
+
+    return norma_max;
 }
 
 
