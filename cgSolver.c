@@ -15,7 +15,7 @@
 int main() {
     srandom(20252);
 
-    int n, k, maxit, it;
+    int n, k, maxit;
     real_t omega, epsilon, norma = 0.0, residuo = 0.0;
     real_t **A, *b, *x, **ASP, *bsp, **D, **L, **U, **M;
     rtime_t tempo_simetrica = 0.0, tempo_dlu = 0.0, tempo_pc_parcial = 0.0, tempo_iter = 0.0, tempo_residuo = 0.0;
