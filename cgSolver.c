@@ -70,7 +70,7 @@ int main() {
 
     residuo = calcResiduoSL(ASP, bsp, x, n, k, &tempo_residuo);
     
-    imprimeResultados(n, x, norma, residuo, tempo_simetrica + tempo_dlu + tempo_pc_parcial, tempo_iter, tempo_residuo);
+    imprimeResultados(n, x, norma, residuo, tempo_dlu + tempo_pc_parcial, tempo_iter, tempo_residuo);
     
 
     // Liberar toda a memoria alocada
